@@ -9,14 +9,12 @@ client = TestClient(app)
 
 def test_create_sandwich():
     response = client.post("/sandwiches/", json={
-        "name": "Test Sandwich",
-        "price": 5.99,
-        "size": "medium",
-        "ingredients": "test ingredients"
+        "sandwich_name": "Test Sandwich",
+        "price": 5.99
     })
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "Test Sandwich"
+    assert data["sandwich_name"] == "Test Sandwich"
     assert data["price"] == 5.99
     assert "id" in data
 
@@ -30,10 +28,8 @@ def test_get_all_sandwiches():
 def test_get_one_sandwich():
     # First create a sandwich
     create_response = client.post("/sandwiches/", json={
-        "name": "Get Test Sandwich",
-        "price": 4.99,
-        "size": "small",
-        "ingredients": "test"
+        "sandwich_name": "Get Test Sandwich",
+        "price": 4.99
     })
     sandwich_id = create_response.json()["id"]
 
@@ -51,10 +47,8 @@ def test_get_sandwich_not_found():
 def test_update_sandwich():
     # First create
     create_response = client.post("/sandwiches/", json={
-        "name": "Update Test",
-        "price": 1.99,
-        "size": "small",
-        "ingredients": "original"
+        "sandwich_name": "Update Test",
+        "price": 1.99
     })
     sandwich_id = create_response.json()["id"]
 
@@ -69,10 +63,8 @@ def test_update_sandwich():
 def test_delete_sandwich():
     # First create
     create_response = client.post("/sandwiches/", json={
-        "name": "Delete Test",
-        "price": 1.99,
-        "size": "small",
-        "ingredients": "to be deleted"
+        "sandwich_name": "Delete Test",
+        "price": 1.99
     })
     sandwich_id = create_response.json()["id"]
 
@@ -89,13 +81,12 @@ def test_delete_sandwich():
 
 def test_create_resource():
     response = client.post("/resources/", json={
-        "name": "Test Resource",
-        "unit": "pieces",
-        "quantity_in_stock": 10
+        "item": "Test Resource",
+        "amount": 10
     })
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "Test Resource"
+    assert data["item"] == "Test Resource"
     assert "id" in data
 
 
@@ -108,9 +99,8 @@ def test_get_all_resources():
 def test_get_one_resource():
     # First create
     create_response = client.post("/resources/", json={
-        "name": "Get Test Resource",
-        "unit": "loaf",
-        "quantity_in_stock": 5
+        "item": "Get Test Resource",
+        "amount": 5
     })
     resource_id = create_response.json()["id"]
 
@@ -128,26 +118,24 @@ def test_get_resource_not_found():
 def test_update_resource():
     # First create
     create_response = client.post("/resources/", json={
-        "name": "Update Test Resource",
-        "unit": "pound",
-        "quantity_in_stock": 10
+        "item": "Update Test Resource",
+        "amount": 10
     })
     resource_id = create_response.json()["id"]
 
     # Then update
     update_response = client.put(f"/resources/{resource_id}", json={
-        "quantity_in_stock": 25
+        "amount": 25
     })
     assert update_response.status_code == 200
-    assert update_response.json()["quantity_in_stock"] == 25
+    assert update_response.json()["amount"] == 25
 
 
 def test_delete_resource():
     # First create
     create_response = client.post("/resources/", json={
-        "name": "Delete Test Resource",
-        "unit": "ounce",
-        "quantity_in_stock": 100
+        "item": "Delete Test Resource",
+        "amount": 100
     })
     resource_id = create_response.json()["id"]
 

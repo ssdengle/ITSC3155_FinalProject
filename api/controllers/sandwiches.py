@@ -1,35 +1,46 @@
 from sqlalchemy.orm import Session
-from fastapi import Response, status
-from api.models import models
-from api.models.schemas import SandwichCreate, SandwichUpdate
+from fastapi import Response, status, HTTPException
+from ..models import sandwiches as model
+from ..schemas import sandwiches as schema
 
-def create(db: Session, sandwich: SandwichCreate):
-    db_sandwich = models.Sandwich(
-        name=sandwich.name,
-        price=sandwich.price,
-        size=sandwich.size,
-        ingredients=sandwich.ingredients
+
+def create(db: Session, request: schema.SandwichCreate):
+    db_sandwich = model.Sandwich(
+        sandwich_name=request.sandwich_name,
+        price=request.price
     )
     db.add(db_sandwich)
     db.commit()
     db.refresh(db_sandwich)
     return db_sandwich
 
+
 def read_all(db: Session):
-    return db.query(models.Sandwich).all()
+    return db.query(model.Sandwich).all()
+
 
 def read_one(db: Session, sandwich_id: int):
-    return db.query(models.Sandwich).filter(models.Sandwich.id == sandwich_id).first()
+    item = db.query(model.Sandwich).filter(model.Sandwich.id == sandwich_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Sandwich not found")
+    return item
 
-def update(db: Session, sandwich_id: int, sandwich: SandwichUpdate):
-    db_sandwich = db.query(models.Sandwich).filter(models.Sandwich.id == sandwich_id)
-    update_data = sandwich.dict(exclude_unset=True)
+
+def update(db: Session, sandwich_id: int, request: schema.SandwichUpdate):
+    db_sandwich = db.query(model.Sandwich).filter(model.Sandwich.id == sandwich_id)
+    if not db_sandwich.first():
+        raise HTTPException(status_code=404, detail="Sandwich not found")
+
+    update_data = request.model_dump(exclude_unset=True)  # Pydantic v2 syntax
     db_sandwich.update(update_data, synchronize_session=False)
     db.commit()
     return db_sandwich.first()
 
+
 def delete(db: Session, sandwich_id: int):
-    db_sandwich = db.query(models.Sandwich).filter(models.Sandwich.id == sandwich_id)
+    db_sandwich = db.query(model.Sandwich).filter(model.Sandwich.id == sandwich_id)
+    if not db_sandwich.first():
+        raise HTTPException(status_code=404, detail="Sandwich not found")
     db_sandwich.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

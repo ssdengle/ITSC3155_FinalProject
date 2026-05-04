@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CustomerBase(BaseModel):
@@ -24,5 +24,4 @@ class CustomerUpdate(BaseModel):
 class Customer(CustomerBase):
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

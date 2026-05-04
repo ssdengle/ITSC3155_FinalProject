@@ -23,7 +23,9 @@ from . import (
 )
 
 from ..dependencies.database import engine
+from ..dependencies.schema_migrate import apply_checklist_migrations
 
 
 def index():
     orders.Base.metadata.create_all(bind=engine)
+    apply_checklist_migrations(engine)

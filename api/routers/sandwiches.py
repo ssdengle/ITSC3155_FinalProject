@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 from ..controllers import sandwiches as controller
 from ..schemas import sandwiches as schema
@@ -8,6 +8,12 @@ router = APIRouter(
     tags=['Sandwiches'],
     prefix="/sandwiches"
 )
+
+
+@router.get("/search", response_model=list[schema.Sandwich])
+def search_sandwiches(q: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+    """Find menu items by tag (e.g. vegetarian) or name substring."""
+    return controller.search_by_tag(db, q)
 
 
 @router.post("/", response_model=schema.Sandwich)

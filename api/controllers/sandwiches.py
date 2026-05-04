@@ -1,3 +1,4 @@
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 from fastapi import Response, status, HTTPException
 from ..models import sandwiches as model
@@ -7,7 +8,8 @@ from ..schemas import sandwiches as schema
 def create(db: Session, request: schema.SandwichCreate):
     db_sandwich = model.Sandwich(
         sandwich_name=request.sandwich_name,
-        price=request.price
+        price=request.price,
+        tags=request.tags,
     )
     db.add(db_sandwich)
     db.commit()
@@ -35,6 +37,22 @@ def update(db: Session, sandwich_id: int, request: schema.SandwichUpdate):
     db_sandwich.update(update_data, synchronize_session=False)
     db.commit()
     return db_sandwich.first()
+
+
+def search_by_tag(db: Session, tag: str):
+    q = tag.strip().lower()
+    if not q:
+        return []
+    return (
+        db.query(model.Sandwich)
+        .filter(
+            or_(
+                model.Sandwich.sandwich_name.ilike(f"%{q}%"),
+                and_(model.Sandwich.tags.isnot(None), model.Sandwich.tags.ilike(f"%{q}%")),
+            )
+        )
+        .all()
+    )
 
 
 def delete(db: Session, sandwich_id: int):
